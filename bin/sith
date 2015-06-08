@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+require 'sith'
+
+ruby_file, filename = ARGV.first, ARGV[1]
+
+ruby_source = File.read(ruby_file)
+macro_source = File.read(filename)
+
+expander = Sith::MacroExpander.new(Sith::load_macros(macro_source))
+puts expander.expand_to_source(ruby_source)
+
+

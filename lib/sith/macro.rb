@@ -1,0 +1,66 @@
+require 'parser/current'
+
+module Sith
+  class BaseMacro
+    def represent(node)
+      return node.to_s unless node.is_a?(Parser::AST::Node) || node.is_a?(Array)
+
+      if node.is_a?(Array)
+        "#{node.map(&method(:represent)).join(', ')}"
+      elsif node.type == :int
+        node.children[0].to_s
+      elsif node.type == :string
+        node.children[0]
+      elsif :send
+        node.children[1].to_s
+      else
+        '?'
+      end
+    end
+
+    def expand_macro(nodes)
+      a = expand_to_source(nodes)
+
+      Parser::CurrentRuby.parse a
+    end
+  end
+
+  class Macro < BaseMacro
+    attr_reader :labels, :stararg, :template
+
+    def initialize(labels, stararg=false, template='')
+      @stararg = stararg
+      @labels = labels
+      @template = template
+    end
+
+    def expand_to_source(nodes)
+      if @stararg
+        substitutions = {@labels[0] => represent(nodes)}
+      else
+        representations = nodes.map { |node| represent node }
+        substitutions = Hash[@labels.zip(representations)]
+      end
+      @template.gsub(/~\{(\w+)\}/) do |label|
+
+
+        substitutions[Regexp.last_match(1).to_sym]
+      end
+    end
+  end
+
+  class MacroMapper < BaseMacro
+    attr_reader :label, :delimiter, :body
+
+    def initialize(label, delimiter="\n", body='')
+      @label = label
+      @delimiter = delimiter
+      @body = body
+    end
+
+    def expand_to_source(nodes)
+      macros = nodes.map { |n| Macro.new([label], false, @body)}
+      macros.map { |m| m.expand_to_source(nodes) }.join(delimiter)
+    end
+  end
+end
