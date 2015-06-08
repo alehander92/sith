@@ -60,7 +60,8 @@ module Sith
 
     def expand_to_source(nodes)
       macros = nodes.map { |n| Macro.new([label], false, @body)}
-      macros.map { |m| m.expand_to_source(nodes) }.join(delimiter)
+      # p macros
+      macros.zip(nodes).map { |m, n| m.expand_to_source([n]) }.join(delimiter)
     end
   end
 end

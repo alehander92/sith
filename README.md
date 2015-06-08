@@ -11,13 +11,13 @@ Example:
 a macro definitions file:
 
 ```ruby
-macro_mapper attr_reader(label, delimiter: "\n")
+macro_mapper attr_reader(label)
   def ~{label}
   	@~{label}
   end
 end
 
-macro_mapper attr_writer(label, delimiter: "\n")
+macro_mapper attr_writer(label)
   def ~{label}=(value)
   	@~{label} = value
   end
@@ -32,7 +32,7 @@ end
 a ruby file
 ```
 class A
-  attr_accessor a
+  attr_accessor a, z
 end
 ```
 
@@ -47,8 +47,14 @@ class A
   def a
     @a
   end
+  def z
+    @z
+  end
   def a=(value)
     @a = value
+  end
+  def z=(value)
+    @z = value
   end
 end
 ```

@@ -1,10 +1,10 @@
-macro_mapper attr_reader(label, delimiter: "\n")
+macro_mapper attr_reader(label)
   def ~{label}
   	@~{label}
   end
 end
 
-macro_mapper attr_writer(label, delimiter: "\n")
+macro_mapper attr_writer(label)
   def ~{label}=(value)
   	@~{label} = value
   end
