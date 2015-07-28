@@ -11,6 +11,9 @@ module Sith
         node.children[0].to_s
       elsif node.type == :string
         node.children[0]
+      elsif node.type == :lvar
+        name = node.children[0].to_s
+        "(#{name}=#{name}; #{name})"
       elsif :send
         node.children[1].to_s
       else
@@ -34,6 +37,13 @@ module Sith
       @template = template
     end
 
+    def ==(other)
+      return false unless other.is_a?(Macro)
+      self.labels == other.labels &&
+        self.stararg == other.stararg &&
+        self.template.strip == other.template.strip
+    end
+
     def expand_to_source(nodes)
       if @stararg
         substitutions = {@labels[0] => represent(nodes)}
@@ -41,9 +51,8 @@ module Sith
         representations = nodes.map { |node| represent node }
         substitutions = Hash[@labels.zip(representations)]
       end
+
       @template.gsub(/~\{(\w+)\}/) do |label|
-
-
         substitutions[Regexp.last_match(1).to_sym]
       end
     end
