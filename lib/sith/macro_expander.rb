@@ -22,6 +22,7 @@ module Sith
       if node.type == :send && @macros.key?(node.children[1])
         node = @macros[node.children[1]].expand_macro(node.children[2..-1])
       end
+
       children = node.children.map(&method(:expand_node))
       Parser::AST::Node.new node.type, children
     end

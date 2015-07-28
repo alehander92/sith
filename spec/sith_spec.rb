@@ -13,12 +13,7 @@ module Sith
         end
       RUBY
 
-      macros = Sith::load_macros(source)
-      macro = macros[:simple]
-      expect(macro).to be_a Macro
-      expect(macro.labels[0]).to be_a Symbol
-      expect(macro.labels[0]).to eq :a
-      expect(macro.template.strip).to eq '~{a} + ~{b}'
+      expect(Sith::load_macros(source)[:simple]).to eq(Macro.new([:a, :b], false, '~{a} + ~{b}'))
     end
 
     it 'can load macro mappers from your macros definitions' do
@@ -52,6 +47,23 @@ module Sith
         expect(expanded.children[1].children[2].type).to eq :int
       end
 
+      it 'works correctly with local variables' do
+        macros = {identity: Macro.new([:value], false, '~{value}')}
+        source = <<-RUBY
+          str = "hello world"
+          identity(str)
+        RUBY
+        expanded = MacroExpander.new(macros).expand(source)
+
+        expect(expanded.children[1].type).to eq :begin
+        expect(expanded.children[1].children[0].type).to eq :lvasgn
+        expect(expanded.children[1].children[0].children[0]).to eq :str
+        expect(expanded.children[1].children[0].children[1].type).to eq :lvar
+        expect(expanded.children[1].children[0].children[1].children[0]).to eq :str
+        expect(expanded.children[1].children[1].type).to eq :lvar
+        expect(expanded.children[1].children[1].children[0]).to eq :str
+      end
+
       it 'can expand macro mappers' do
         macros = {attr_reader: MacroMapper.new(:attr,
                                          "\n",
@@ -69,7 +81,3 @@ module Sith
     end
   end
 end
-
-
-
-
